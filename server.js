@@ -6,6 +6,7 @@ dotenv.config;
 const PORT = 5000 || process.env.PORT;
 const app = express();
 app.use(bodyParser.json());
+app.set("view engine", "ejs");
 
 app.use(cors());
 require("./dbconnection/dbconnection");
@@ -16,11 +17,12 @@ app.use(
     require("./router/notes"),
     require("./router/image"),
     require("./router/pdf"),
-    require("./router/feedback")
+    require("./router/feedback"),
+    require("./router/showNotes"),
+    require("./router/deleteUser"),
+    require("./router/confirmMail"),
+    require("./router/saveverifiedmail")
 );
-app.get("/api/v1/", (req, res) => {
-    res.send({ message: "api call sucessfully" });
-});
 
 app.listen(PORT, () => {
     console.log(`server started at port ${PORT}`);

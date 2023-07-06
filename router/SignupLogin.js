@@ -6,16 +6,22 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 require("../dbconnection/dbconnection");
 const Signup = require("../model/signupSchema");
+const Status = require("../model/saveverifiedstatusSchema");
+const axios = require("axios");
 
 router.post("/signup", async (req, res) => {
     const { name, email, password, cpassword } = req.body;
-
+    let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
     try {
         if (!name || !email || !password || !cpassword) {
             return res.status(400).json({ error: "fill all the field" });
         }
+        const valid = regex.test(email);
+        if (valid == false) {
+            return res.status(400).json({ error: "Invalid creditials !" });
+        }
         if (password !== cpassword) {
-            return res.status(400).json({ err: "passwotrd mis-match" });
+            return res.status(400).json({ err: "password mis-match!" });
         }
         const userExist = await Signup.findOne({ email: email });
 
@@ -32,11 +38,20 @@ router.post("/signup", async (req, res) => {
             cpassword: seccPass,
         });
         const SignupSave = await signup.save();
+        const uesrEmail = email;
         if (SignupSave) {
+            try {
+                const res = await axios.post(
+                    `http://localhost:${process.env.PORT}/api/v1/sendmail?email=${uesrEmail}`
+                );
+            } catch (err) {
+                console.log(err);
+            }
+
             success = true;
             return res
                 .status(200)
-                .json({ success, message: "signup successfully" });
+                .json({ success, message: "Verify Your E-mail!" });
         }
     } catch (err) {
         console.log(err);
@@ -48,44 +63,70 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
         res.status(400).json({ error: "all field is required!" });
     }
-    try {
-        let userData = await Signup.findOne({ email: email });
-        console.log("userData1234", userData);
-        if (!userData) {
-            res.status(400).json({ error: "invalid creditials" });
-        }
-        const secMatchPass = await bcrypt.compare(password, userData.password);
+    const verifiedUSer = await Status.findOne({ email: email });
 
-        console.log("PASSWORD_MATCH", secMatchPass);
-        if (secMatchPass === false) {
-            res.status(400).json({ error: "invalid crediatials" });
+    if (!verifiedUSer) {
+        const SignupEmail = await Signup.findOne({ email: email });
+        if (SignupEmail) {
+            try {
+                const res = await axios.post(
+                    `http://localhost:${process.env.PORT}/api/v1/sendmail?email=${email}`
+                );
+            } catch (err) {
+                console.log(err);
+            }
+            res.status(400).json({
+                error: "Your Email is Not Verified ! Please verified your email!",
+            });
+        }
+    } else {
+        if (verifiedUSer.value == "verified!") {
+            try {
+                let userData = await Signup.findOne({ email: email });
+                if (!userData) {
+                    res.status(400).json({ error: "invalid creditials" });
+                }
+                const secMatchPass = await bcrypt.compare(
+                    password,
+                    userData.password
+                );
+
+                if (secMatchPass === false) {
+                    res.status(400).json({ error: "invalid crediatials" });
+                } else {
+                    const data = {
+                        userData: {
+                            id: userData.id,
+                        },
+                    };
+                    const token = jwt.sign(data, secretkey, {
+                        expiresIn: "1d",
+                    });
+                    success = true;
+                    res.json({ success, token });
+                }
+            } catch (err) {
+                console.log(err);
+            }
         } else {
-            const data = {
-                userData: {
-                    id: userData.id,
-                },
-            };
-            const token = jwt.sign(data, secretkey, { expiresIn: "1d" });
-            success = true;
-            // var endRes=[{message:"sucessfully"},{token:token}]
-            // console.log(endRes)
-            // // console.log(endRes[1].token);  this is use to access token of frontend
-
-            // res.send(endRes);
-            res.json({ success, token });
+            res.status(400).json({ error: "Your Email is Not Verified !" });
         }
-    } catch (err) {
-        console.log(err);
     }
 });
 
-router.post("/getuser", fetchuser, async (req, res) => {
+router.get("/getuser", fetchuser, async (req, res) => {
     try {
         userID = req.userData.id;
         const user = await Signup.findById(userID)
+            .select("-_id")
             .select("-password")
             .select("-cpassword");
-        res.send(user);
+        if (user) {
+            success = true;
+            res.status(200).json({ user, success });
+        } else {
+            res.status(500).json({ error: "invalid user!" });
+        }
     } catch (err) {
         console.log(err);
     }

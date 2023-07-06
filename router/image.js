@@ -4,7 +4,8 @@ const multer = require("multer");
 const path = require("path");
 const Images = require("../model/imageSchema");
 const fetchuser = require("../middleware/fetchuser");
-const imageFormat = require("../middleware/imageFormat");
+
+// const imageFormat = require("../middleware/imageFormat");
 const storage = multer.diskStorage({
     destination: "./upload/images",
     filename: (req, file, cb) => {
@@ -46,7 +47,6 @@ router.post(
             if (!req.file) {
                 res.status(400).json({ message: "image not selected" });
             } else {
-                console.log(req.file);
                 const image = new Images({
                     image: req.file.filename,
                     user: req.userData.id,
@@ -68,9 +68,8 @@ router.post(
 );
 router.get("/getAllimage", fetchuser, async (req, res) => {
     const getImage = await Images.find();
-    console.log("getImage", getImage);
     const imageUrls = getImage.map((imageObj) => {
-        return `http://localhost:5000/image/${imageObj.image}`;
+        return `http://localhost:${process.env.PORT}/api/v1/image/${imageObj.image}`;
     });
 
     res.json({

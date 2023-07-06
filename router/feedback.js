@@ -20,7 +20,7 @@ feedback_router.post("/userFeedback", async (req, res) => {
     }
 });
 
-feedback_router.get("/getFeedback", async (req, res) => {
+feedback_router.get("/userFeedback", async (req, res) => {
     const showFeedbacks = await Feedback.find();
     if (showFeedbacks) {
         success = true;
