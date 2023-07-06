@@ -6,6 +6,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 require("../dbconnection/dbconnection");
 const Signup = require("../model/signupSchema");
+const Status = require("../model/saveverifiedstatusSchema");
 const axios = require("axios");
 
 router.post("/signup", async (req, res) => {
@@ -40,7 +41,7 @@ router.post("/signup", async (req, res) => {
         const uesrEmail = email;
         if (SignupSave) {
             try {
-                const res = await axios.get(
+                const res = await axios.post(
                     `http://localhost:${process.env.PORT}/api/v1/sendmail?email=${uesrEmail}`
                 );
             } catch (err) {
@@ -62,27 +63,54 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
         res.status(400).json({ error: "all field is required!" });
     }
-    try {
-        let userData = await Signup.findOne({ email: email });
-        if (!userData) {
-            res.status(400).json({ error: "invalid creditials" });
-        }
-        const secMatchPass = await bcrypt.compare(password, userData.password);
+    const verifiedUSer = await Status.findOne({ email: email });
 
-        if (secMatchPass === false) {
-            res.status(400).json({ error: "invalid crediatials" });
-        } else {
-            const data = {
-                userData: {
-                    id: userData.id,
-                },
-            };
-            const token = jwt.sign(data, secretkey, { expiresIn: "1d" });
-            success = true;
-            res.json({ success, token });
+    if (!verifiedUSer) {
+        const SignupEmail = await Signup.findOne({ email: email });
+        if (SignupEmail) {
+            try {
+                const res = await axios.post(
+                    `http://localhost:${process.env.PORT}/api/v1/sendmail?email=${email}`
+                );
+            } catch (err) {
+                console.log(err);
+            }
+            res.status(400).json({
+                error: "Your Email is Not Verified ! Please verified your email!",
+            });
         }
-    } catch (err) {
-        console.log(err);
+    } else {
+        if (verifiedUSer.value == "verified!") {
+            try {
+                let userData = await Signup.findOne({ email: email });
+                if (!userData) {
+                    res.status(400).json({ error: "invalid creditials" });
+                }
+                const secMatchPass = await bcrypt.compare(
+                    password,
+                    userData.password
+                );
+
+                if (secMatchPass === false) {
+                    res.status(400).json({ error: "invalid crediatials" });
+                } else {
+                    const data = {
+                        userData: {
+                            id: userData.id,
+                        },
+                    };
+                    const token = jwt.sign(data, secretkey, {
+                        expiresIn: "1d",
+                    });
+                    success = true;
+                    res.json({ success, token });
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        } else {
+            res.status(400).json({ error: "Your Email is Not Verified !" });
+        }
     }
 });
 
