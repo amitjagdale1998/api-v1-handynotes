@@ -17,12 +17,18 @@ router.post("/saveNotes", fetchuser, async (req, res) => {
         return res
             .status(200)
             .json({ success, message: "notes save sucessfully" });
+    } else {
+        res.status(400).json({ message: "something Wrong!" });
     }
 });
 
 router.get("/getNotes", fetchuser, async (req, res) => {
     const getNotes = await Notes.find({ user: req.userData.id });
-    res.json(getNotes);
+    if (!getNotes) {
+        res.status(500).json({ error: "Notes is not availabel" });
+    } else {
+        res.status(200).json(getNotes);
+    }
 });
 
 router.get("/getAllNotes", async (req, res) => {
@@ -30,7 +36,7 @@ router.get("/getAllNotes", async (req, res) => {
     if (!getAllNotes) {
         res.status(400).json({ error: "something error" });
     } else {
-        res.json(getAllNotes);
+        res.status(200).json(getAllNotes);
     }
 });
 

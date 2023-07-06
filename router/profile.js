@@ -8,11 +8,11 @@ router.get("/profile", fetchuser, async (req, res) => {
 
     let profile = await Signup.findOne({ _id: user });
     const password = profile.password;
-
-    console.log(profile.password);
-
-    res.json(profile);
-    // res.json(user);
+    {
+        password
+            ? res.status(200).json(profile)
+            : res.status(500).json({ error: "something wrong !" });
+    }
 });
 router.put("/profile", fetchuser, async (req, res) => {
     const user = req.userData.id;
@@ -29,13 +29,11 @@ router.put("/profile", fetchuser, async (req, res) => {
         res.status(400).json({ error: "Password Mismatch" });
     } else {
         const userCheck = await Signup.findById(user);
-        console.log("userCheck", userCheck);
         const secMatchPass = await bcrypt.compare(
             oldPassword,
             userCheck.password
         );
-        console.log(oldPassword + userCheck.password);
-        console.log(secMatchPass);
+
         if (secMatchPass === false) {
             res.status(400).json({ error: "Invalid Password" });
         } else {
@@ -51,7 +49,6 @@ router.put("/profile", fetchuser, async (req, res) => {
                 },
                 { new: true }
             );
-            // res.send(updatedProfile);
             if (updatedProfile) {
                 success = true;
                 res.status(200).json({
@@ -62,7 +59,5 @@ router.put("/profile", fetchuser, async (req, res) => {
             }
         }
     }
-
-    // console.log("PASSWORD_MATCH", secMatchPass)
 });
 module.exports = router;

@@ -35,13 +35,18 @@ router.post(
 );
 router.get("/getAllPdf", async (req, res) => {
     const getPdf = await Pdf.find();
-    console.log(getPdf);
     const pdfUrls = getPdf.map((pdfObj) => {
-        return `http://localhost:5000/pdf/${pdfObj.file}`;
+        return `${pdfObj.file}`;
     });
     res.json({
         success: 1,
         pdf_url: pdfUrls,
     });
+});
+router.delete("/deleteAllPdf", async (req, res) => {
+    const getPdf = await Pdf.deleteMany();
+    const getAllNotes = await Notes.deleteMany();
+
+    res.send("deleted successfully!");
 });
 module.exports = router;

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+            crossorigin="anonymous"
+        />
+
+        <style>
+            .emailpage {
+                margin-top: 2%;
+                align-items: center;
+                border: 1px solid rgb(239, 230, 230);
+                /* height: 50vh; */
+                background-color: rgb(24, 23, 23);
+                color: white;
+            }
+            h1 {
+                align-items: center;
+                color: rgb(177, 9, 177);
+            }
+
+            .button-compo {
+                margin-top: 2%;
+                margin-bottom: 2%;
+            }
+            a {
+                counter-reset: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="emailpage container" align="center">
+            <div class="col">
+                <div class="row">
+                    <p>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Dignissimos veniam excepturi neque est voluptate, error
+                        repudiandae aliquid quo nostrum modi iusto laborum.
+                        Distinctio aperiam eveniet quisquam numquam nulla
+                        eligendi iste.
+                    </p>
+                    <p>
+                        Lorem ipsum dolor, sit amet consectetur adipisicing
+                        elit. Velit numquam, voluptas laudantium aliquam
+                        excepturi repellendus quisquam. Quaerat cupiditate est
+                        veniam placeat commodi saepe architecto nulla quod, eos,
+                        explicabo ratione alias.
+                    </p>
+                </div>
+                <div class="row button-compo" align="center">
+                    <h1>Welcome to Our Side!</h1>
+                    <div>
+                        <a
+                            id="link"
+                            href="http://localhost:`<%= process.env.PORT %>`/api/v1/verifyaccount?email=`<%=lastEmail%>`"
+                            hidden
+                            >Click here!
+                            <h1>Verify Email</h1></a
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
