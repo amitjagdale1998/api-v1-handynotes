@@ -14,19 +14,19 @@ router.post("/signup", async (req, res) => {
   let regex = new RegExp("[a-z0-9]+@[a-z]+.[a-z]{2,3}");
   try {
     if (!name || !email || !password || !cpassword) {
-      return res.status(400).json({ error: "fill all the field" });
+      res.status(400).json({ error: "fill all the field" });
     }
     const valid = regex.test(email);
     if (valid == false) {
-      return res.status(400).json({ error: "Invalid creditials !" });
+      res.status(400).json({ error: "Invalid creditials !" });
     }
     if (password !== cpassword) {
-      return res.status(400).json({ err: "password mis-match!" });
+      res.status(400).json({ err: "password mis-match!" });
     }
     const userExist = await Signup.findOne({ email: email });
 
     if (userExist) {
-      return res.status(400).json({ error: "email already registered!" });
+      res.status(400).json({ error: "email already registered!" });
     }
     const salt = await bcrypt.genSalt(10);
     const secPass = await bcrypt.hash(password, salt);
@@ -44,8 +44,9 @@ router.post("/signup", async (req, res) => {
         const res = await axios.post(
           `http://localhost:${process.env.PORT}/api/v1/sendmail?email=${uesrEmail}`
         );
+        console.log(res.data);
       } catch (err) {
-        console.log(err);
+        console.log("Email sending error", err);
       }
 
       success = true;
@@ -71,9 +72,9 @@ router.post("/login", async (req, res) => {
           `http://localhost:${process.env.PORT}/api/v1/sendmail?email=${email}`
         );
       } catch (err) {
-        console.log(err);
+        console.log("Email sending error", err);
       }
-      return res.status(400).json({
+      res.status(400).json({
         error: "Your Email is Not Verified ! Please verified your email!",
       });
     }
@@ -82,7 +83,7 @@ router.post("/login", async (req, res) => {
       try {
         let userData = await Signup.findOne({ email: email });
         if (!userData) {
-          return res.status(400).json({ error: "invalid creditials" });
+          res.status(400).json({ error: "invalid creditials" });
         }
         const secMatchPass = await bcrypt.compare(password, userData.password);
 
@@ -98,13 +99,13 @@ router.post("/login", async (req, res) => {
             expiresIn: "1d",
           });
           success = true;
-          return res.json({ success, token });
+          res.json({ success, token });
         }
       } catch (err) {
         console.log(err);
       }
     } else {
-      return res.status(400).json({ error: "Your Email is Not Verified !" });
+      res.status(400).json({ error: "Your Email is Not Verified !" });
     }
   }
 });
