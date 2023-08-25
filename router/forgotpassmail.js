@@ -18,12 +18,12 @@ send_pass.post("/sendmailpass", async (req, res) => {
     },
   });
 
-  ejs.renderFile(
+  await ejs.renderFile(
     emailTemplatePath,
     { lastEmail },
     async (err, renderedHtml) => {
       if (err) {
-        console.error("Error rendering email template:", err);
+        console.log("Error rendering email template:", err);
         return res.status(500).json({ message: "Internal server error" });
       }
 
@@ -36,9 +36,14 @@ send_pass.post("/sendmailpass", async (req, res) => {
       };
 
       try {
-        const info = transporter.sendMail(mailOptions);
+        const info = await transporter.sendMail(mailOptions);
+
         if (info.messageId) {
+          success = true;
           res.status(200).json({ message: "Verify Your Email!" });
+        }
+        if (!info.messageId) {
+          res.status(500).json({ error: "internal server error!" });
         }
       } catch (error) {
         console.error("Error sending email:", error);
