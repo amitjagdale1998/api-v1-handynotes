@@ -1,11 +1,13 @@
 const express=require("express");
 const updatePass=express.Router();
 const Signup=require("../model/signupSchema");
-  
+const bcrypt = require("bcryptjs");  
 
 updatePass.put("/updatepassword",async(req,res)=>
 {
     const {password,cpassword,email}=req.body;
+    
+
  try{
     let regex =/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*(_|[^\w])).{8,20}$/;
     ;
@@ -24,6 +26,8 @@ updatePass.put("/updatepassword",async(req,res)=>
 *It doesn’t contain any white space.
  used this pattern`});
     }
+
+
     if (!email || !password || !cpassword) {
         res.status(400).json({ error: "All field Mandatory" });
     }
@@ -31,14 +35,17 @@ updatePass.put("/updatepassword",async(req,res)=>
         res.status(400).json({ error: "Password Mismatch" });
     } else
     {
+        const salt=await bcrypt.genSalt(10);
+        const secPass=await bcrypt.hash(password,salt);
+        const seccPass=await bcrypt.hash(cpassword,salt)
         const updatePassword= await Signup.findOneAndUpdate(
 
             email,
             {
                 $set:
                 {
-                    password: password,
-                    cpassword: cpassword,
+                    password: secPass,
+                    cpassword: seccPass,
                 }
             },
             { new: true }
