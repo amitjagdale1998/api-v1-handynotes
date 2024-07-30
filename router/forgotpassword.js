@@ -9,14 +9,15 @@ forgot_password.post("/forgotpassword", async (req, res) => {
     if (!checkEmail) {
       return res.status(400).json({ error: "invalid user!" });
     }
+    
     if (checkEmail) {
       const resData = await axios.post(
         `http://localhost:${process.env.PORT}/api/v1/sendmailpass?email=${email}`
       );
-      console.log(res.data, "havsgbdakj");
+      
       const response = resData.data;
-      console.log(response.messageId, "jhgwkwqkjwhkj");
-      if (!response.messageId) {
+      console.log(response, "jhgwkwqkjwhkj");
+      if (!response.message) {
         res.status(500).json({ error: "internal server Error!" });
       } else {
         success = true;

@@ -23,7 +23,8 @@ app.use(
   require("./router/confirmMail"),
   require("./router/saveverifiedmail"),
   require("./router/forgotpassword"),
-  require("./router/forgotpassmail")
+  require("./router/forgotpassmail"),
+  require("./router/updatePassword"),
 );
 
 app.listen(PORT, () => {

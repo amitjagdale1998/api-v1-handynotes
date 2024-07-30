@@ -112,7 +112,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/getuser", fetchuser, async (req, res) => {
   try {
-    userID = req.userData.id;
+    const userID = req.userData.id;
     const user = await Signup.findById(userID)
       .select("-_id")
       .select("-password")
